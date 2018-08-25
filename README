@@ -1,0 +1,20 @@
+PoolCounter is a network daemon which provides mutex-like functionality,
+with a limited wait queue length. If too many servers try to do the same
+thing at the same time, the wait queue overflows and some configurable action
+might be taken by subsequent clients, such as displaying an error message or
+using a stale cache entry.
+
+See <https://www.mediawiki.org/wiki/PoolCounter> for more details.
+
+== Installation ==
+
+You need libevent (libevent-dev on Debian-based systems).
+
+$ make
+$ sudo make install
+
+There is no daemonize code, so you'll want to background it with something
+like systemd.
+
+== License ==
+Released under the GPL v3, or any later version. See COPYING for more details.
