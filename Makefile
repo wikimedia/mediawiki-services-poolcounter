@@ -6,6 +6,7 @@ OBJS=main.o client_data.o locks.o hash.o stats.o
 LINK=-levent -lm
 HEADERS=prototypes.h client_data.h stats.h stats.list
 DESTDIR ?=
+PYTEST=$(shell which pytest pytest-3)
 
 poolcounterd: $(OBJS)
 	$(CC) $^ $(LINK) -o $@
@@ -26,7 +27,6 @@ install:
 	install -d $(DESTDIR)/usr/bin/
 	install poolcounterd $(DESTDIR)/usr/bin/
 
-# Depends on bundler and `bundle update`.  And probably ruby-dev or rvm.
+# Depends on pytest and python3
 test: clean debug
-	./poolcounterd & echo $$! > .pid
-	cd tests; cucumber; SUC=$$?; cd ..; kill `cat .pid` && rm .pid ; exit $$SUC
+	$(PYTEST)

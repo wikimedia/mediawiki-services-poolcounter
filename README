@@ -16,5 +16,21 @@ $ sudo make install
 There is no daemonize code, so you'll want to background it with something
 like systemd.
 
+=== Running tests ===
+You will need to have pytest installed (python3-pytest on Debian-based
+systems).
+
+$ make test
+
+If you want to test against an already built PoolCounter (like a packaged
+version), you can set an environment variable:
+
+$ POOLCOUNTERD=/usr/bin/poolcounterd pytest
+
+To run the test suite as well as a Python linter to match what CI does, you
+can use tox:
+
+$ tox
+
 == License ==
 Released under the GPL v3, or any later version. See COPYING for more details.
