@@ -1,0 +1,5 @@
+*.o
+*.pid
+poolcounterd
+prototypes.h
+core
