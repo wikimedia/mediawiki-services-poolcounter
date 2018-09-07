@@ -50,14 +50,14 @@ def test_full(poolcounter, clients):
 
 
 def test_waiting_workers(poolcounter, clients):
-    """waiting_workers is 0 because we aren't running concurrent tests"""
+    """Waiting_workers is 0 because we aren't running concurrent tests"""
     client = clients.get(1)
     client.send('STATS waiting_workers')
     assert client.receive() == 'waiting_workers: 0'
 
 
 def test_hashtable_entries(poolcounter, clients):
-    """hashtable_entries is 0 because we aren't running concurrent tests"""
+    """Hashtable_entries is 0 because we aren't running concurrent tests"""
     client = clients.get(1)
     client.send('STATS hashtable_entries')
     assert client.receive() == 'hashtable_entries: 0'

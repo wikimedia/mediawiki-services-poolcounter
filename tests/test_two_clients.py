@@ -23,7 +23,8 @@ def test_only_one_lock_no_queue_space(poolcounter, clients, lock_type):
 
 def test_only_one_lock_no_workers_nor_queue_space(
         poolcounter, clients, lock_type):
-    """Only one can lock if there aren't workers and not enough queue space"""
+    """Only one can lock if there aren't enough workers nor enough queue
+    space"""
     client1, client2 = clients.get(2)
     client1.send('%s l 1 1 1' % lock_type)
     assert client1.receive() == 'LOCKED'
@@ -170,7 +171,7 @@ def test_lock_twice_multiple_executors(poolcounter, clients, lock_type):
 
 
 def test_disconnect_while_timeout(poolcounter, clients, lock_type):
-    """Disconnecting while waiting for a timeout is ok"""
+    """Disconnecting while waiting for a timeout is OK"""
     client1, client2 = clients.get(2)
     client1.send('%s l 1 10 1' % lock_type)
     assert client1.receive() == 'LOCKED'
@@ -198,7 +199,7 @@ def test_no_early_timeout_after_initial_delay(poolcounter, clients):
     """
     Do not get early timeout after initial delay
 
-    The "gets not response" here is within 5 seconds, meaning the
+    The "gets no response" here is within 5 seconds, meaning the
     timeout doesn't come early
     """
     client1, client2 = clients.get(2)

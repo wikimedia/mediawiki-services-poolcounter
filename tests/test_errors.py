@@ -9,14 +9,14 @@ def test_garbage(poolcounter, clients):
 
 
 def test_locking_just_lockname(poolcounter, clients, lock_type):
-    """locking with just lock name results in error"""
+    """Locking with just lock name results in error"""
     client = clients.get(1)
     client.send('%s l' % lock_type)
     assert client.receive() == 'ERROR BAD_SYNTAX'
 
 
 def test_locking_no_workers(poolcounter, clients, lock_type):
-    """locking with no workers results in error"""
+    """Locking with no workers results in error"""
     client = clients.get(1)
     client.send('%s l 0 1 1' % lock_type)
     assert client.receive() == 'ERROR BAD_SYNTAX'
