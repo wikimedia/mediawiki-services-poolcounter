@@ -100,8 +100,7 @@ class Client:
         return self.local_port
 
 
-@pytest.fixture(scope='session')
-def poolcounter():
+def find_poolcounterd():
     # env POOLCOUNTERD can point to the binary if you want to run tests
     # against an installed version
     path = os.environ.get(
@@ -110,9 +109,20 @@ def poolcounter():
     )
     if not os.path.exists(path):
         pytest.skip('%s does not exist' % path)
+    return path
+
+
+@pytest.fixture(scope='session')
+def poolcounter():
+    path = find_poolcounterd()
     daemon = subprocess.Popen([path])
     yield daemon
     daemon.terminate()
+
+
+@pytest.fixture()
+def poolcounter_path():
+    return find_poolcounterd()
 
 
 # Use a singleton ClientPool to keep local_ports global

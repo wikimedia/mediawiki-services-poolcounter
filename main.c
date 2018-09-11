@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -23,14 +24,37 @@ int main(int argc, char** argv) {
 	struct event_base *base;
 	struct stat st;
 	int listener;
+	int c;
+	/* By default only listen on localhost */
+	char *listen_on = "127.0.0.1";
+	struct in_addr listen_addr;
+	int listen_valid;
 
 	if ( argc >= 1 ) {
 		global_argv = argv;
 	}
 
+	while ( ( c = getopt( argc, argv, "l:" ) ) != -1 ) {
+		switch ( c ) {
+			case 'l':
+				listen_on = optarg;
+				break;
+			default: /* '?' */
+				fprintf( stderr, "Usage: %s [-l address]\n",
+					argv[0] );
+				return 1;
+		}
+	}
+
+	listen_valid = inet_aton( listen_on, &listen_addr );
+	if ( listen_valid == 0 ) {
+		fprintf( stderr, "Address `%s` is not valid to listen on.\n", listen_on );
+		return 1;
+	}
+
 	if ( fstat( 0, &st ) || ! S_ISSOCK( st.st_mode ) ) {
 		close( 0 ); /* Place the listener socket in fd 0 */
-		listener = listensocket( PORT );
+		listener = listensocket( PORT, listen_addr );
 	} else {
 		/* We have been given the listening socket in stdin */
 		listener = 0;
@@ -60,7 +84,7 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-int listensocket(short int port) /* prototype */
+int listensocket(short int port, struct in_addr listen_addr) /* prototype */
 {
 	int s;
 	struct sockaddr_in addr;
@@ -72,7 +96,7 @@ int listensocket(short int port) /* prototype */
 
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_addr = listen_addr;
 
 	if ( bind( s, (struct sockaddr *)&addr, sizeof( struct sockaddr ) ) == -1 ) {
 		perror("Couldn't bind");
