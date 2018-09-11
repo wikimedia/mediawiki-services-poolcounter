@@ -1,4 +1,5 @@
 import pytest
+import subprocess
 
 
 def test_garbage(poolcounter, clients):
@@ -45,3 +46,9 @@ def test_locking_while_waiting(poolcounter, clients, lock_type):
     client1.send('%s l 1 10 10' % lock_type)
     client1.send('%s l 1 10 10' % lock_type)
     assert client1.receive() == 'ERROR WAIT_FOR_RESPONSE'
+
+
+def test_invalid_listen(poolcounter_path):
+    with pytest.raises(subprocess.CalledProcessError) as e:
+        subprocess.check_call([poolcounter_path, '-l', 'bad'])
+    assert e.value.returncode == 1
