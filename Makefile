@@ -1,7 +1,6 @@
 CC=gcc
 DEFINES=-DENDIAN_BIG=0 -DENDIAN_LITTLE=1 -DHAVE_ACCEPT4=1
-CFLAGS=-Wall -Werror $(DEFINES) $(DEBUG_FLAGS)
-DEBUG_FLAGS=-DNDEBUG
+CFLAGS=-Wall -Werror $(DEFINES)
 OBJS=main.o client_data.o locks.o hash.o stats.o
 LINK=-levent -lm
 HEADERS=prototypes.h client_data.h stats.h stats.list
@@ -10,9 +9,6 @@ PYTEST=$(shell which pytest pytest-3)
 
 poolcounterd: $(OBJS)
 	$(CC) $^ $(LINK) -o $@
-
-debug: DEBUG_FLAGS=-DDEBUG -g
-debug: poolcounterd
 
 %.o: %.c $(HEADERS)
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -28,5 +24,5 @@ install:
 	install poolcounterd $(DESTDIR)/usr/bin/
 
 # Depends on pytest and python3
-test: clean debug
+test: poolcounterd
 	$(PYTEST)
