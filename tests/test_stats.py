@@ -6,7 +6,7 @@ def test_uptime(poolcounter, clients):
     client = clients.get(1)
     client.send('STATS UPTIME')
     recv = client.receive()
-    assert re.search('uptime: \d+ days, \d+h \d+m \d+s', recv)
+    assert re.search(r'uptime: \d+ days, \d+h \d+m \d+s', recv)
 
 
 def test_full(poolcounter, clients):
@@ -14,39 +14,39 @@ def test_full(poolcounter, clients):
     client = clients.get(1)
     client.send('STATS FULL')
     recv = client.receive()
-    assert re.search('uptime: \d+ days, \d+h \d+m \d+s', recv)
+    assert re.search(r'uptime: \d+ days, \d+h \d+m \d+s', recv)
     assert re.search(
-        'total processing time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
+        r'total processing time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
         recv)
     assert re.search(
-        'average processing time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
+        r'average processing time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
         recv)
     assert re.search(
-        'gained time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
+        r'gained time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
     assert re.search(
-        'waiting time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
+        r'waiting time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
     assert re.search(
-        'waiting time for me: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
+        r'waiting time for me: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
     assert re.search(
-        'waiting time for anyone: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
+        r'waiting time for anyone: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
         recv)
     assert re.search(
-        'waiting time for good: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
+        r'waiting time for good: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s',
         recv)
     assert re.search(
-        'wasted timeout time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
-    assert re.search('total_acquired: \d+', recv)
-    assert re.search('total_releases: \d+', recv)
-    assert re.search('hashtable_entries: \d+', recv)
-    assert re.search('processing_workers: \d+', recv)
-    assert re.search('waiting_workers: \d+', recv)
-    assert re.search('connect_errors: \d+', recv)
-    assert re.search('failed_sends: \d+', recv)
-    assert re.search('full_queues: \d+', recv)
-    assert re.search('lock_mismatch: \d+', recv)
-    assert re.search('lock_while_waiting: \d+', recv)
-    assert re.search('release_mismatch: \d+', recv)
-    assert re.search('processed_count: \d+', recv)
+        r'wasted timeout time: (((\d+ days )?\d+h )?\d+m )?\d+(\.\d+)?s', recv)
+    assert re.search(r'total_acquired: \d+', recv)
+    assert re.search(r'total_releases: \d+', recv)
+    assert re.search(r'hashtable_entries: \d+', recv)
+    assert re.search(r'processing_workers: \d+', recv)
+    assert re.search(r'waiting_workers: \d+', recv)
+    assert re.search(r'connect_errors: \d+', recv)
+    assert re.search(r'failed_sends: \d+', recv)
+    assert re.search(r'full_queues: \d+', recv)
+    assert re.search(r'lock_mismatch: \d+', recv)
+    assert re.search(r'lock_while_waiting: \d+', recv)
+    assert re.search(r'release_mismatch: \d+', recv)
+    assert re.search(r'processed_count: \d+', recv)
 
 
 def test_waiting_workers(poolcounter, clients):
