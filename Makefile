@@ -25,4 +25,4 @@ install:
 
 # Depends on pytest and python3
 test: poolcounterd
-	$(PYTEST)
+	$(PYTEST) -v
