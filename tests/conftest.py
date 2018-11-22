@@ -15,7 +15,7 @@ class ClientPool:
 
     def get(self, count):
         ret = []
-        for i in range(1, count+1):
+        for i in range(1, count + 1):
             try:
                 local_port = self.local_ports.pop()
             except KeyError:
