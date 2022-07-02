@@ -5,7 +5,6 @@ OBJS=main.o client_data.o locks.o hash.o stats.o
 LDFLAGS+=-levent -lm
 HEADERS=prototypes.h client_data.h stats.h stats.list
 DESTDIR ?=
-PYTEST=$(shell which pytest pytest-3)
 
 poolcounterd: $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
@@ -25,4 +24,4 @@ install:
 
 # Depends on pytest and python3
 test: poolcounterd
-	$(PYTEST) -v
+	pytest -v
