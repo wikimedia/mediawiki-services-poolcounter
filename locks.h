@@ -32,10 +32,10 @@ struct PoolCounter {
 };
 
 enum lock_state {
-	UNLOCKED,    // Not yet locked or already unlocked
-	WAITING,     // Waiting on ACQ4ME
-	WAIT_ANY,    // Waiting on ACQ4ANY
-	PROCESSING,  // Currently locked
+	LS_UNLOCKED,    // Not yet locked or already unlocked
+	LS_WAITING,     // Waiting on ACQ4ME
+	LS_WAIT_ANY,    // Waiting on ACQ4ANY
+	LS_PROCESSING,  // Currently locked
 };
 
 struct locks {

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "client_data.h"
 #include "locks.h"
@@ -17,7 +17,7 @@ struct client_data* new_client_data(int fd) {
 	cli_data->fd = fd;
 	int i;
 	for ( i = 0; i < MAX_LOCKS_PER_CLIENT; i++ ) {
-		cli_data->client_locks[i].state = UNLOCKED;
+		cli_data->client_locks[i].state = LS_UNLOCKED;
 	}
 	return cli_data;
 }
@@ -25,7 +25,7 @@ struct client_data* new_client_data(int fd) {
 int all_unlocked(struct client_data* cli_data) {
 	int i;
 	for ( i = 0; i < MAX_LOCKS_PER_CLIENT; i++ ) {
-		if ( cli_data->client_locks[i].state != UNLOCKED ) {
+		if ( cli_data->client_locks[i].state != LS_UNLOCKED ) {
 			fprintf( stderr, "%d lock still locked after free_client_data.  next_lock is %d.  State is %d.\n",
 				i, cli_data->next_lock, cli_data->client_locks[i].state );
 			return 0;
@@ -150,7 +150,7 @@ void process_timeout(struct client_data* cli_data) {
 		return;
 	}
 	struct locks* l = cli_data->client_locks + cli_data->next_lock - 1;
-	if ( ( l->state == WAIT_ANY ) || ( l->state == WAITING ) ) {
+	if ( ( l->state == LS_WAIT_ANY ) || ( l->state == LS_WAITING ) ) {
 		// Ignore any timeouts for locks not waiting - those are just left over
 		// because its expensive to cancel them.
 		cli_data->next_lock--;

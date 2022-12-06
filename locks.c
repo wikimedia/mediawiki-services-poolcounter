@@ -1,4 +1,7 @@
 #define _XOPEN_SOURCE 500
+#define _POSIX_C_SOURCE 200809L
+#define _DARWIN_C_SOURCE 200809L
+
 #include "stats.h"
 #include "locks.h"
 #include "hash.h"
@@ -10,8 +13,8 @@
 #include <assert.h>
 
 void finish_lock(struct locks* l) {
-	if (l->state != UNLOCKED) {
-		if (l->state != PROCESSING) {
+	if (l->state != LS_UNLOCKED) {
+		if (l->state != LS_PROCESSING) {
 			decr_stats( waiting_workers );
 		}
 		remove_client_lock(l, 0);
@@ -57,7 +60,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 		}
 		if ( cli_data->next_lock > 0 ) {
 			struct locks* last_lock = cli_data->client_locks + cli_data->next_lock - 1;
-			if ( last_lock->state != PROCESSING ) {
+			if ( last_lock->state != LS_PROCESSING ) {
 				/*
 				 * Handling multiple timeouts would require some extensive
 				 * rejiggering and we don't expect users to try anyway.  So we
@@ -109,7 +112,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 		}
 
 		if ( pCounter->processing < workers ) {
-			struct locks* l = init_next_lock( cli_data, pCounter, PROCESSING );
+			struct locks* l = init_next_lock( cli_data, pCounter, LS_PROCESSING );
 			if ( !l ) {
 				/*
 				 * We check for this condition way way up above so we should
@@ -129,7 +132,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 		if ( !timeout ) {
 			return "TIMEOUT\n";
 		}
-		struct locks* l = init_next_lock( cli_data, pCounter, for_anyone ? WAIT_ANY : WAITING );
+		struct locks* l = init_next_lock( cli_data, pCounter, for_anyone ? LS_WAIT_ANY : LS_WAITING );
 		pCounter->count++;
 		struct timeval wait_time;
 		if ( for_anyone ) {
@@ -157,7 +160,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 		}
 		cli_data->next_lock--;
 		struct locks* l = cli_data->client_locks + cli_data->next_lock;
-		if ( l->state == UNLOCKED ) {
+		if ( l->state == LS_UNLOCKED ) {
 			incr_stats( release_mismatch );
 			return "NOT_LOCKED\n";
 		}
@@ -190,7 +193,7 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 		}
 	}
 
-	if ( l->state == PROCESSING ) {
+	if ( l->state == LS_PROCESSING ) {
 		/* One slot freed, wake up another worker */
 
 		time_stats( l, processing_time );
@@ -217,7 +220,7 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 			DOUBLE_LLIST_DEL( &new_owner->siblings );
 			DOUBLE_LLIST_ADD( &l->parent->working, &new_owner->siblings );
 			send_client( cli_data, "LOCKED\n" );
-			new_owner->state = PROCESSING;
+			new_owner->state = LS_PROCESSING;
 			incr_stats( total_acquired );
 			decr_stats( waiting_workers );
 			gettimeofday( &l->timeval, NULL );
@@ -227,7 +230,7 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 		}
 	}
 
-	l->state = UNLOCKED;
+	l->state = LS_UNLOCKED;
 	l->parent->count--;
 	if ( !l->parent->count ) {
 		decr_stats( hashtable_entries );
@@ -295,7 +298,7 @@ void* hashtable_find(struct hashtable* ht, uint32_t hash_value, const char* key)
 			/* Empty hash table */
 			free(ht->old_hashtable);
 			ht->old_hashtable = NULL;
-			return NULL; 
+			return NULL;
 		}
 		return hashtable_find( ht->old_hashtable, hash_value, key );
 	}
