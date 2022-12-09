@@ -1,5 +1,11 @@
 CC=gcc
-DEFINES=-DENDIAN_BIG=0 -DENDIAN_LITTLE=1 -DHAVE_ACCEPT4=1
+DEFINES=-DENDIAN_BIG=0 -DENDIAN_LITTLE=1
+OS := $(shell uname -s)
+ifeq ($(OS),Darwin)
+   DEFINES+= -DHAVE_ACCEPT4=0
+else
+   DEFINES+= -DHAVE_ACCEPT4=1
+endif
 CFLAGS+=-Wall -Werror $(DEFINES) $(CPPFLAGS)
 OBJS=main.o client_data.o locks.o hash.o stats.o
 LDFLAGS+=-levent -lm
