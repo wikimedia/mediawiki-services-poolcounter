@@ -27,8 +27,11 @@ int main(int argc, char** argv) {
 	int c;
 	/* By default only listen on localhost */
 	char *listen_on = "127.0.0.1";
+	char *listen_on6 = "::1";
 	struct in_addr listen_addr;
+	struct in6_addr listen_addr6;
 	int listen_valid;
+	int listen_valid6;
 
 	if ( argc >= 1 ) {
 		global_argv = argv;
@@ -38,6 +41,7 @@ int main(int argc, char** argv) {
 		switch ( c ) {
 			case 'l':
 				listen_on = optarg;
+				listen_on6 = optarg;
 				break;
 			default: /* '?' */
 				fprintf( stderr, "Usage: %s [-l address]\n",
@@ -46,15 +50,20 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	listen_valid = inet_aton( listen_on, &listen_addr );
-	if ( listen_valid == 0 ) {
+	listen_valid = inet_pton(AF_INET, listen_on, &listen_addr);
+	listen_valid6 = inet_pton(AF_INET6, listen_on6, &listen_addr6);
+	if ( listen_valid == 0 && listen_valid6 == 0 ) {
 		fprintf( stderr, "Address `%s` is not valid to listen on.\n", listen_on );
 		return 1;
 	}
 
 	if ( fstat( 0, &st ) || ! S_ISSOCK( st.st_mode ) ) {
 		close( 0 ); /* Place the listener socket in fd 0 */
-		listener = listensocket( PORT, listen_addr );
+		if ( listen_valid == 1 ) {
+			listener = listensocket( PORT, listen_addr );
+		} else {
+			listener = listensocket6( PORT, listen_addr6 );
+		}
 	} else {
 		/* We have been given the listening socket in stdin */
 		listener = 0;
@@ -99,6 +108,35 @@ int listensocket(short int port, struct in_addr listen_addr) /* prototype */
 	addr.sin_addr = listen_addr;
 
 	if ( bind( s, (struct sockaddr *)&addr, sizeof( struct sockaddr ) ) == -1 ) {
+		perror("Couldn't bind");
+		close( s );
+		exit( 1 );
+	}
+
+	if (listen( s, BACKLOG ) == -1) {
+		perror("Couldn't listen");
+		close( s );
+		exit( 1 );
+	}
+
+	return s;
+}
+
+int listensocket6(short int port, struct in6_addr listen_addr) /* prototype */
+{
+	int s;
+	struct sockaddr_in6 addr;
+
+	if ( ( s = socket( AF_INET6, SOCK_STREAM, 0 ) ) == -1 ) {
+		perror("Couldn't create TCP socket");
+		exit(1);
+	}
+
+	addr.sin6_family = AF_INET6;
+	addr.sin6_port = htons(port);
+	addr.sin6_addr = listen_addr;
+
+	if ( bind( s, (struct sockaddr *)&addr, sizeof( struct sockaddr_in6 ) ) == -1 ) {
 		perror("Couldn't bind");
 		close( s );
 		exit( 1 );
