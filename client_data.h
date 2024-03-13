@@ -15,7 +15,7 @@ struct client_data {
 	struct locks client_locks[MAX_LOCKS_PER_CLIENT];
 };
 
-struct client_data* new_client_data();
+struct client_data* new_client_data(int fd);
 void free_client_data(struct client_data* cli_data);
 struct locks* init_next_lock(struct client_data* cli_data, struct PoolCounter* parent, enum lock_state state);
 int read_client_line(int fd, struct client_data* cli_data, char** line);
