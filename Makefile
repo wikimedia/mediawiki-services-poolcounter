@@ -1,6 +1,8 @@
 CC=gcc
 DEFINES=-DENDIAN_BIG=0 -DENDIAN_LITTLE=1
 OS := $(shell uname -s)
+TEST_IMAGE = localhost/poolcounter-test
+
 ifeq ($(OS),Darwin)
    DEFINES+= -DHAVE_ACCEPT4=0
    # Avoid `fatal error: 'event.h' file not found` due to Homebrew
@@ -38,3 +40,14 @@ install:
 # Depends on pytest and python3
 test: poolcounterd
 	pytest -v
+
+build-ci-image:
+	DOCKER_BUILDKIT=1 docker build \
+		-f .pipeline/blubber.yaml \
+		--target test \
+		--tag $(TEST_IMAGE) \
+		--load \
+		.
+
+test-ci: build-ci-image
+	docker run -it --rm $(TEST_IMAGE)

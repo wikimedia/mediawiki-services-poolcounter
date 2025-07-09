@@ -17,6 +17,8 @@ There is no daemonize code, so you'll want to background it with something
 like systemd.
 
 === Running tests ===
+
+==== Local environment ====
 You will need to have pytest installed (python3-pytest on Debian-based
 systems).
 
@@ -31,6 +33,12 @@ To run the test suite as well as a Python linter to match what CI does, you
 can use tox:
 
 $ tox
+
+==== Using Docker ====
+
+With Docker, build the image and run the tests from a container using:
+
+$ make test-ci
 
 == License ==
 Released under the GPL v3, or any later version. See COPYING for more details.

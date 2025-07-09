@@ -1,0 +1,10 @@
+pipelines:
+  test:
+    blubberfile: blubber.yaml
+    stages:
+      - name: run-tests
+        build: test
+        run:
+          env:
+            TOX_TESTENV_PASSENV: '*'
+            FORCE_COLOR: '1'

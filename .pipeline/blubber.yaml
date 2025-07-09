@@ -1,0 +1,15 @@
+# syntax=docker-registry.wikimedia.org/repos/releng/blubber/buildkit:v1.3.0
+version: v4
+base: docker-registry.wikimedia.org/python3-build-bookworm:0.1.0-20250504
+
+variants:
+  test:
+    runs:
+      insecurely: true
+    copies: [local]
+    apt:
+      packages:
+        - gcc
+        - libevent-dev
+        - tox
+    entrypoint: [tox]
