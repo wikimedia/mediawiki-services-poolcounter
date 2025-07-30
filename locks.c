@@ -2,6 +2,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE 200809L
 
+#include "debug.h"
 #include "stats.h"
 #include "locks.h"
 #include "hash.h"
@@ -52,6 +53,8 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 		line_len--;
 		line[line_len] = '\0';
 	}
+
+	debug( "(locks.c) Processing line: %s\n", line );
 
 	if ( !strncmp( line, "ACQ4ME ", 7 ) || !strncmp( line, "ACQ4ANY ", 8 ) ) {
 		if ( cli_data->next_lock >= MAX_LOCKS_PER_CLIENT ) {
@@ -111,6 +114,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 			return "QUEUE_FULL\n";
 		}
 
+		debug( "(locks.c) processing: %d, workers: %d\n", pCounter->processing, workers );
 		if ( pCounter->processing < workers ) {
 			struct locks* l = init_next_lock( cli_data, pCounter, LS_PROCESSING );
 			if ( !l ) {
@@ -127,6 +131,7 @@ const char* process_line(struct client_data* cli_data, char* line, int line_len)
 			incr_stats( processing_workers );
 			DOUBLE_LLIST_ADD( &pCounter->working, &l->siblings );
 			incr_stats( total_acquired );
+			debug( "(locks.c) managed to get a lock. Returning LOCKED\n" );
 			return "LOCKED\n";
 		}
 		if ( !timeout ) {
@@ -184,6 +189,7 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 			struct locks* to_notify = (struct locks*)l->parent->for_anyone.next;
 			struct client_data* cli_data = to_notify->client_data;
 			time_stats( to_notify, waiting_time_for_good );
+			debug( "(locks.c) wakeup anyones, sending DONE\n" );
 			send_client( cli_data, "DONE\n" );
 			cli_data->next_lock--;
 			assert( cli_data->next_lock + cli_data->client_locks == to_notify );
@@ -191,6 +197,8 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 			decr_stats( waiting_workers );
 			time_stats( l, gained_time );
 		}
+	} else {
+		debug( "(locks.c) removing a lock\n" );
 	}
 
 	if ( l->state == LS_PROCESSING ) {
@@ -219,6 +227,7 @@ void remove_client_lock(struct locks* l, int wakeup_anyones) {
 			time_stats( new_owner, waiting_time );
 			DOUBLE_LLIST_DEL( &new_owner->siblings );
 			DOUBLE_LLIST_ADD( &l->parent->working, &new_owner->siblings );
+			debug( "(locks.c) sending LOCKED to client\n" );
 			send_client( cli_data, "LOCKED\n" );
 			new_owner->state = LS_PROCESSING;
 			incr_stats( total_acquired );
