@@ -104,12 +104,31 @@ def test_second_lock_first_unlock(poolcounter, clients):
     assert client2.receive() == 'LOCKED'
 
 
+def send_extra_event_to(client):
+    """
+    Send an extra event to prevent epoll from potentially processing "out of
+    order".
+
+    An example is:
+    * client 1 acquire lock
+    * client 2 request lock
+    * client 1 release lock
+
+    The last two events can be processed in a different order, in which case
+    the client2 would get the lock immediately (LOCKED) instead of being waked
+    up (DONE). T399257
+    """
+    client.send("STATS UPTIME")
+    client.receive()
+
+
 def test_second_lock_first_unlock_any(poolcounter, clients):
     """Second client's ACQ4ANY DONEs if first unlocks"""
     client1, client2 = clients.get(2)
     client1.send('ACQ4ANY l 1 2 5')
     assert client1.receive() == 'LOCKED'
     client2.send('ACQ4ANY l 1 2 5')
+    send_extra_event_to(client1)
     client1.send('RELEASE')
     assert client1.receive() == 'RELEASED'
     assert client2.receive() == 'DONE'
@@ -121,6 +140,7 @@ def test_done_no_unlock(poolcounter, clients):
     client1.send('ACQ4ME l 1 2 5')
     assert client1.receive() == 'LOCKED'
     client2.send('ACQ4ANY l 1 2 5')
+    send_extra_event_to(client1)
     client1.send('RELEASE')
     assert client1.receive() == 'RELEASED'
     assert client2.receive() == 'DONE'
@@ -134,6 +154,7 @@ def test_done_no_consume_lock(poolcounter, clients):
     client1.send('ACQ4ME l 1 5 5')
     assert client1.receive() == 'LOCKED'
     client2.send('ACQ4ANY l 1 5 5')
+    send_extra_event_to(client1)
     client1.send('RELEASE')
     assert client1.receive() == 'RELEASED'
     assert client2.receive() == 'DONE'
