@@ -3,6 +3,11 @@ DEFINES=-DENDIAN_BIG=0 -DENDIAN_LITTLE=1
 OS := $(shell uname -s)
 TEST_IMAGE = localhost/poolcounter-test
 
+ifdef DEBUG
+$(info Defined DEBUG)
+DEFINES+=-DDEBUG=1
+endif
+
 ifeq ($(OS),Darwin)
    DEFINES+= -DHAVE_ACCEPT4=0
    # Avoid `fatal error: 'event.h' file not found` due to Homebrew
@@ -18,7 +23,7 @@ endif
 CFLAGS+=-Wall -Werror $(DEFINES) $(CPPFLAGS)
 OBJS=main.o client_data.o locks.o hash.o stats.o
 LDFLAGS+=-levent -lm
-HEADERS=prototypes.h client_data.h stats.h stats.list
+HEADERS=debug.h prototypes.h client_data.h stats.h stats.list
 DESTDIR ?=
 
 poolcounterd: $(OBJS)

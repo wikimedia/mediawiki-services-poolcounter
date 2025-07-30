@@ -40,5 +40,17 @@ With Docker, build the image and run the tests from a container using:
 
 $ make test-ci
 
+=== Debugging ===
+
+You can enable debug messages to stderr by recompiling with DEBUG define set:
+
+$ make DEBUG=1 clean poolcounterd
+
+Example output:
+
+[poolcounter] DEBUG: (locks.c) Processing line: ACQ4ANY l 1 2 5
+[poolcounter] DEBUG: (locks.c) processing: 0, workers: 1
+[poolcounter] DEBUG: (locks.c) managed to get a lock. Returning LOCKED
+
 == License ==
 Released under the GPL v3, or any later version. See COPYING for more details.
